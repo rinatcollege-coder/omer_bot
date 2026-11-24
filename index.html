@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>עומר – מנחה לתרגיל 2 | הערכת לומדים</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #1e3a8a;
+      color: #ffffff;
+      padding: 16px 24px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { font-size: 1.25rem; margin-bottom: 4px; }
+    header p { font-size: 0.88rem; opacity: 0.9; }
+    #chat-container {
+      flex: 1;
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .message {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      line-height: 1.55;
+      font-size: 0.96rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .user {
+      align-self: flex-end;
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-left-radius: 4px;
+    }
+    .typing {
+      align-self: flex-start;
+      font-size: 0.85rem;
+      color: #64748b;
+      padding: 4px 10px;
+    }
+    #input-area {
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      padding: 12px 16px;
+    }
+    #input-form {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+    }
+    textarea {
+      flex: 1;
+      resize: none;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 0.96rem;
+      height: 48px;
+      max-height: 140px;
+      outline: none;
+    }
+    textarea:focus { border-color: #2563eb; }
+    button {
+      background: #1e3a8a;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 0 22px;
+      font-size: 0.96rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>עומר – מנחה לתרגיל 2 בקורס "הערכת לומדים"</h1>
+    <p>מלווה אתכם בניתוח כלי הערכה, בניית טבלת מתאר וחשיבה ביקורתית (שיעורים 4–6)</p>
+  </header>
+
+  <div id="chat-container">
+    <div class="message bot">היי :) אני עומר, העוזר שלכם בתרגיל 2 בקורס "הערכת לומדים".
+תפקידי לעזור לכם להתקדם בתרגיל בצורה מסודרת ויעילה – וגם לאתגר אתכם בדרך, כדי שתתרגלו לבחון בעצמכם ולא רק לקבל תשובות.
+
+כדי שנתחיל, ספרו לי:
+1. איזה מבחן בחרתם לנתח כקבוצה (תחום דעת, שכבת גיל ונושא)?
+2. האם כבר בחרתם את 8 השאלות מתוכו, ומהן מטרות ההוראה שאתם משערים שהנחו את המורה שחיבר/ה אותו?</div>
+  </div>
+
+  <div id="input-area">
+    <form id="input-form">
+      <textarea id="user-input" placeholder="כתבו כאן לעומר... (Enter לשליחה, Shift+Enter לשורה חדשה)" required></textarea>
+      <button type="submit" id="send-btn">שליחה</button>
+    </form>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById("chat-container");
+    const form = document.getElementById("input-form");
+    const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    const history = [
+      {
+        role: "model",
+        parts: [{ text: document.querySelector(".message.bot").textContent }]
+      }
+    ];
+
+    function appendMessage(text, sender) {
+      const div = document.createElement("div");
+      div.className = `message ${sender}`;
+      div.textContent = text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event("submit"));
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, "user");
+      history.push({ role: "user", parts: [{ text }] });
+      input.value = "";
+      sendBtn.disabled = true;
+
+      const typing = document.createElement("div");
+      typing.className = "typing";
+      typing.textContent = "עומר מקליד...";
+      chatContainer.appendChild(typing);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const res = await fetch("/.netlify/functions/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ history })
+        });
+        const data = await res.json();
+        typing.remove();
+
+        if (data.reply) {
+          appendMessage(data.reply, "bot");
+          history.push({ role: "model", parts: [{ text: data.reply }] });
+        } else {
+          appendMessage("אופס, חלה תקלה בחיבור. נסו לשלוח שוב.", "bot");
+        }
+      } catch (err) {
+        typing.remove();
+        appendMessage("שגיאת תקשורת מול השרת. בדקו את החיבור ונסו שוב.", "bot");
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
